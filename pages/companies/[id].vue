@@ -241,96 +241,13 @@ const router = useRouter()
 
 const isFollowing = ref(false)
 
-// Mock company data
-const company = ref({
-  id: route.params.id,
-  name: 'TechCorp Inc.',
-  tagline: 'Building the future of technology',
-  location: 'San Francisco, CA',
-  headquarters: 'San Francisco, California, USA',
-  size: '500-1000',
-  industry: 'Technology',
-  website: 'techcorp.com',
-  founded: '2015',
-  funding: 'Series C',
-  rating: '4.5',
-  followers: '2.5K',
-  openJobs: 15,
-  email: 'careers@techcorp.com',
-  phone: '+1 (555) 123-4567',
-  description: 'TechCorp is a leading technology company focused on building innovative solutions for businesses worldwide. We pride ourselves on our collaborative culture and commitment to excellence.',
-  longDescription: 'Founded in 2015, TechCorp has grown from a small startup to a major player in the technology industry. Our mission is to empower businesses through cutting-edge technology solutions that drive growth and efficiency. We believe in fostering a culture of innovation, collaboration, and continuous learning.',
-  values: [
-    {
-      title: 'Innovation',
-      description: 'We constantly push boundaries and embrace new technologies'
-    },
-    {
-      title: 'Collaboration',
-      description: 'We work together to achieve extraordinary results'
-    },
-    {
-      title: 'Excellence',
-      description: 'We strive for the highest quality in everything we do'
-    },
-    {
-      title: 'Growth',
-      description: 'We invest in our people and their professional development'
-    }
-  ],
-  benefits: [
-    'Health, dental, and vision insurance',
-    'Flexible working hours',
-    'Remote work options',
-    'Professional development budget',
-    '401(k) with company matching',
-    'Unlimited PTO',
-    'Stock options',
-    'Free lunch and snacks',
-    'Gym membership',
-    'Mental health support'
-  ],
-  techStack: [
-    'React', 'Node.js', 'Python', 'AWS', 'Docker', 'Kubernetes',
-    'PostgreSQL', 'Redis', 'GraphQL', 'TypeScript', 'Vue.js', 'MongoDB'
-  ],
-  socialLinks: [
-    { platform: 'LinkedIn', url: 'https://linkedin.com/company/techcorp', icon: 'LinkedInIcon' },
-    { platform: 'Twitter', url: 'https://twitter.com/techcorp', icon: 'TwitterIcon' },
-    { platform: 'GitHub', url: 'https://github.com/techcorp', icon: 'GitHubIcon' }
-  ]
+const { data: company, pending, error } = await useFetch(`/api/companies/${route.params.id}`, {
+  lazy: true,
+  server: false
 })
 
-// Mock open jobs
-const openJobs = ref([
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    location: 'San Francisco, CA',
-    type: 'full-time',
-    salary: '$120K - $180K',
-    posted: '2 days ago',
-    description: 'Join our team to build amazing user experiences with modern technologies.'
-  },
-  {
-    id: 2,
-    title: 'Backend Engineer',
-    location: 'Remote',
-    type: 'full-time',
-    salary: '$110K - $160K',
-    posted: '1 week ago',
-    description: 'Build scalable backend systems and APIs using Node.js and Python.'
-  },
-  {
-    id: 3,
-    title: 'Product Manager',
-    location: 'San Francisco, CA',
-    type: 'full-time',
-    salary: '$130K - $200K',
-    posted: '3 days ago',
-    description: 'Lead product strategy and work with cross-functional teams.'
-  }
-])
+// TODO: Fetch open jobs for this company
+const openJobs = ref([])
 
 function followCompany() {
   isFollowing.value = !isFollowing.value
