@@ -51,9 +51,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="company in paginatedCompanies"
-        :key="company.id"
+        :key="company._id"
         class="card p-6 hover:border-primary-300 transition-all duration-200 cursor-pointer"
-        @click="viewCompany(company.id)"
+        @click="viewCompany(company._id)"
       >
         <div class="flex items-start space-x-4 mb-4">
           <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center">
@@ -84,7 +84,7 @@
             <span class="text-primary-600 font-medium">{{ company.openJobs }} open positions</span>
           </div>
           <button
-            @click.stop="followCompany(company.id)"
+            @click.stop="followCompany(company._id)"
             class="text-gray-400 hover:text-primary-600 transition-colors"
           >
             <HeartIcon class="w-5 h-5" />
@@ -141,69 +141,10 @@ const sortBy = ref('name')
 const currentPage = ref(1)
 const companiesPerPage = 12
 
-// Mock companies data
-const companies = ref([
-  {
-    id: 1,
-    name: 'TechCorp Inc.',
-    industry: 'Technology',
-    size: '500-1000',
-    location: 'San Francisco, CA',
-    description: 'Leading technology company focused on building innovative solutions for businesses worldwide.',
-    openJobs: 15,
-    website: 'techcorp.com'
-  },
-  {
-    id: 2,
-    name: 'InnovateLab',
-    industry: 'Technology',
-    size: '200-500',
-    location: 'New York, NY',
-    description: 'Innovation-driven company creating cutting-edge products and services.',
-    openJobs: 8,
-    website: 'innovatelab.com'
-  },
-  {
-    id: 3,
-    name: 'DesignStudio',
-    industry: 'Design',
-    size: '50-200',
-    location: 'Remote',
-    description: 'Creative design agency specializing in digital experiences and brand identity.',
-    openJobs: 5,
-    website: 'designstudio.com'
-  },
-  {
-    id: 4,
-    name: 'FinanceFlow',
-    industry: 'Finance',
-    size: '1000+',
-    location: 'Chicago, IL',
-    description: 'Financial services company providing innovative banking and investment solutions.',
-    openJobs: 22,
-    website: 'financeflow.com'
-  },
-  {
-    id: 5,
-    name: 'HealthTech Solutions',
-    industry: 'Healthcare',
-    size: '200-500',
-    location: 'Boston, MA',
-    description: 'Healthcare technology company improving patient outcomes through digital innovation.',
-    openJobs: 12,
-    website: 'healthtech.com'
-  },
-  {
-    id: 6,
-    name: 'EduPlatform',
-    industry: 'Education',
-    size: '100-200',
-    location: 'Austin, TX',
-    description: 'Educational technology platform transforming online learning experiences.',
-    openJobs: 7,
-    website: 'eduplatform.com'
-  }
-])
+const { data: companies, pending, error } = await useFetch('/api/companies', {
+  lazy: true,
+  server: false
+})
 
 const filteredCompanies = computed(() => {
   let filtered = companies.value
