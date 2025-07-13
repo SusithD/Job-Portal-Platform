@@ -1,12 +1,16 @@
-import { MongoClient } from 'mongodb'
+import mongoose from 'mongoose'
 
 const uri = process.env.MONGODB_URI // Store your MongoDB URI in .env
-let client
 
-export async function getDb() {
-  if (!client) {
-    client = new MongoClient(uri)
-    await client.connect()
+export async function connectMongoose() {
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(uri, {
+      dbName: 'jobportal',
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
   }
-  return client.db('jobportal') // Use your database name here
+  return mongoose
 }
+
+export default mongoose
