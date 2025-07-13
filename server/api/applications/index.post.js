@@ -4,6 +4,12 @@ import Application from '~/server/models/Application'
 
 export default defineEventHandler(async (event) => {
   await connectMongoose()
+  if (!event.context.auth) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized: No auth context.'
+    })
+  }
   const { userId } = event.context.auth
   const { jobId } = await readBody(event)
 
