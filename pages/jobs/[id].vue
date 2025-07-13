@@ -186,67 +186,13 @@ const { user } = useAuth()
 const isSaved = ref(false)
 const hasApplied = ref(false)
 
-// Mock job data - would come from API
-const job = ref({
-  id: route.params.id,
-  title: 'Senior Frontend Developer',
-  company: 'TechCorp Inc.',
-  companyId: 1,
-  location: 'San Francisco, CA',
-  type: 'full-time',
-  salary: '$120K - $180K',
-  posted: '2 days ago',
-  deadline: 'March 15, 2025',
-  experienceLevel: 'Senior (5+ years)',
-  remote: true,
-  industry: 'Technology',
-  companySize: '500-1000',
-  companyWebsite: 'techcorp.com',
-  description: 'Join our team to build amazing user experiences with modern technologies. We are looking for a passionate developer with 5+ years of experience.',
-  longDescription: 'As a Senior Frontend Developer at TechCorp, you will be responsible for developing and maintaining our web applications using React, Vue.js, and other modern frameworks. You will work closely with our design and backend teams to create seamless user experiences.',
-  requirements: [
-    '5+ years of experience in frontend development',
-    'Proficiency in React, Vue.js, or Angular',
-    'Strong knowledge of JavaScript, HTML, and CSS',
-    'Experience with modern build tools and workflows',
-    'Understanding of responsive design principles',
-    'Experience with version control systems (Git)',
-    'Strong problem-solving and communication skills'
-  ],
-  skills: ['React', 'Vue.js', 'TypeScript', 'CSS', 'JavaScript', 'Git'],
-  benefits: [
-    'Health, dental, and vision insurance',
-    'Flexible working hours',
-    'Remote work options',
-    'Professional development budget',
-    '401(k) with company matching',
-    'Unlimited PTO',
-    'Stock options',
-    'Free lunch and snacks'
-  ],
-  companyDescription: 'TechCorp is a leading technology company focused on building innovative solutions for businesses worldwide. We pride ourselves on our collaborative culture and commitment to excellence.'
+const { data: job, pending, error } = await useFetch(`/api/jobs/${route.params.id}`, {
+  lazy: true,
+  server: false
 })
 
-const similarJobs = ref([
-  {
-    id: 2,
-    title: 'React Developer',
-    company: 'WebFlow Inc.',
-    location: 'Remote'
-  },
-  {
-    id: 3,
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY'
-  },
-  {
-    id: 4,
-    title: 'JavaScript Engineer',
-    company: 'CodeCraft',
-    location: 'Austin, TX'
-  }
-])
+// TODO: Fetch similar jobs from API
+const similarJobs = ref([])
 
 function saveJob() {
   isSaved.value = !isSaved.value
