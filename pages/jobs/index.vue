@@ -58,9 +58,9 @@
     <div class="space-y-6">
       <div
         v-for="job in paginatedJobs"
-        :key="job.id"
+        :key="job._id"
         class="card p-6 hover:border-primary-300 transition-all duration-200 cursor-pointer"
-        @click="viewJob(job.id)"
+        @click="viewJob(job._id)"
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-start space-x-4">
@@ -80,7 +80,7 @@
                 <span class="mx-2">•</span>
                 <span class="capitalize">{{ job.type }}</span>
                 <span class="mx-2">•</span>
-                <span>{{ job.posted }}</span>
+                <span>{{ new Date(job.createdAt).toLocaleDateString() }}</span>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@
           <div class="flex flex-col items-end space-y-2">
             <span class="text-lg font-semibold text-primary-600">{{ job.salary }}</span>
             <button
-              @click.stop="saveJob(job.id)"
+              @click.stop="saveJob(job._id)"
               class="p-2 text-gray-400 hover:text-red-500 transition-colors"
             >
               <HeartIcon class="w-5 h-5" />
@@ -110,7 +110,7 @@
           </div>
           
           <button
-            @click.stop="applyToJob(job.id)"
+            @click.stop="applyToJob(job._id)"
             class="btn btn-primary"
           >
             Apply Now
@@ -170,46 +170,10 @@ const sortBy = ref('newest')
 const currentPage = ref(1)
 const jobsPerPage = 10
 
-// Mock data - would come from API
-const jobs = ref([
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    company: 'TechCorp Inc.',
-    location: 'San Francisco, CA',
-    type: 'full-time',
-    category: 'technology',
-    description: 'Join our team to build amazing user experiences with React, Vue, and modern JavaScript. We are looking for a passionate developer with 5+ years of experience.',
-    salary: '$120K - $180K',
-    posted: '2 days ago',
-    skills: ['React', 'Vue.js', 'TypeScript', 'CSS']
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    company: 'InnovateLab',
-    location: 'New York, NY',
-    type: 'full-time',
-    category: 'technology',
-    description: 'Lead product strategy and work with cross-functional teams to deliver innovative solutions. Experience with agile methodologies required.',
-    salary: '$130K - $200K',
-    posted: '1 day ago',
-    skills: ['Product Strategy', 'Agile', 'Analytics', 'Leadership']
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Remote',
-    type: 'contract',
-    category: 'design',
-    description: 'Create beautiful and intuitive user interfaces for web and mobile applications. Strong portfolio required.',
-    salary: '$80K - $120K',
-    posted: '3 days ago',
-    skills: ['Figma', 'Sketch', 'Prototyping', 'User Research']
-  },
-  // Add more mock jobs...
-])
+const { data: jobs, pending, error } = await useFetch('/api/jobs', {
+  lazy: true,
+  server: false
+})
 
 const filteredJobs = computed(() => {
   let filtered = jobs.value
