@@ -170,12 +170,10 @@ const sortBy = ref('newest')
 const currentPage = ref(1)
 const jobsPerPage = 10
 
-const { data: jobs, pending, error } = await useFetch('/api/jobs', {
-  lazy: true,
-  server: false
-})
+const { data: jobs, pending, error } = await useFetch('/api/jobs')
 
 const filteredJobs = computed(() => {
+  if (!jobs.value) return []
   let filtered = jobs.value
 
   if (filters.search) {

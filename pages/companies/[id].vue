@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div v-if="company" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Company Header -->
     <div class="card p-8 mb-8">
       <div class="flex items-start justify-between mb-6">
@@ -241,10 +241,7 @@ const router = useRouter()
 
 const isFollowing = ref(false)
 
-const { data: company, pending, error } = await useFetch(`/api/companies/${route.params.id}`, {
-  lazy: true,
-  server: false
-})
+const { data: company, pending, error } = await useFetch(`/api/companies/${route.params.id}`)
 
 // TODO: Fetch open jobs for this company
 const openJobs = ref([])
@@ -262,7 +259,7 @@ function applyToJob(jobId) {
 }
 
 useSeoMeta({
-  title: `${company.value.name} - Company Profile | JobPortal`,
-  description: company.value.description
+  title: () => `${company.value?.name} - Company Profile | JobPortal`,
+  description: () => company.value?.description
 })
 </script>

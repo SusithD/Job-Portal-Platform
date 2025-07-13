@@ -141,12 +141,10 @@ const sortBy = ref('name')
 const currentPage = ref(1)
 const companiesPerPage = 12
 
-const { data: companies, pending, error } = await useFetch('/api/companies', {
-  lazy: true,
-  server: false
-})
+const { data: companies, pending, error } = await useFetch('/api/companies')
 
 const filteredCompanies = computed(() => {
+  if (!companies.value) return []
   let filtered = companies.value
 
   if (filters.search) {

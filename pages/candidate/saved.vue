@@ -35,7 +35,7 @@
     <div v-if="filteredJobs.length > 0" class="space-y-6">
       <div
         v-for="job in filteredJobs"
-        :key="job.id"
+        :key="job._id"
         class="card p-6 hover:border-primary-300 transition-all duration-200"
       >
         <div class="flex items-start justify-between">
@@ -58,13 +58,13 @@
                     <span class="mx-2">•</span>
                     <span class="capitalize">{{ job.type }}</span>
                     <span class="mx-2">•</span>
-                    <span>Posted {{ job.posted }}</span>
+                    <span>Posted {{ new Date(job.createdAt).toLocaleDateString() }}</span>
                   </div>
                 </div>
                 <div class="flex items-center space-x-2">
                   <span class="text-lg font-semibold text-primary-600">{{ job.salary }}</span>
                   <button
-                    @click="unsaveJob(job.id)"
+                    @click="unsaveJob(job._id)"
                     class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                     title="Remove from saved"
                   >
@@ -94,13 +94,13 @@
                 
                 <div class="flex space-x-2">
                   <NuxtLink
-                    :to="`/jobs/${job.id}`"
+                    :to="`/jobs/${job._id}`"
                     class="btn btn-outline"
                   >
                     View Details
                   </NuxtLink>
                   <button
-                    @click="applyToJob(job.id)"
+                    @click="applyToJob(job._id)"
                     class="btn btn-primary"
                   >
                     Apply Now
@@ -111,11 +111,11 @@
               <!-- Saved Date -->
               <div class="mt-3 pt-3 border-t border-gray-200">
                 <div class="flex items-center justify-between text-sm text-gray-500">
-                  <span>Saved {{ job.savedDate }}</span>
+                  <span>Saved on {{ new Date(job.createdAt).toLocaleDateString() }}</span>
                   <div class="flex items-center space-x-4">
-                    <span v-if="job.applicationDeadline" class="flex items-center">
+                    <span v-if="job.deadline" class="flex items-center">
                       <ClockIcon class="w-4 h-4 mr-1" />
-                      Deadline: {{ job.applicationDeadline }}
+                      Deadline: {{ new Date(job.deadline).toLocaleDateString() }}
                     </span>
                     <span v-if="job.isUrgent" class="text-red-600 font-medium">
                       Urgent Hiring
@@ -187,65 +187,7 @@ const filters = reactive({
 const sortBy = ref('newest')
 const selectedJobs = ref([])
 
-// Mock saved jobs data
-const savedJobs = ref([
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    company: 'TechCorp Inc.',
-    location: 'San Francisco, CA',
-    type: 'full-time',
-    salary: '$120K - $180K',
-    posted: '2 days ago',
-    savedDate: '1 day ago',
-    applicationDeadline: 'March 15, 2025',
-    isUrgent: false,
-    description: 'Join our team to build amazing user experiences with React, Vue, and modern JavaScript.',
-    skills: ['React', 'Vue.js', 'TypeScript', 'CSS', 'JavaScript', 'Git']
-  },
-  {
-    id: 2,
-    title: 'Product Manager',
-    company: 'InnovateLab',
-    location: 'New York, NY',
-    type: 'full-time',
-    salary: '$130K - $200K',
-    posted: '1 day ago',
-    savedDate: '3 hours ago',
-    applicationDeadline: 'March 20, 2025',
-    isUrgent: true,
-    description: 'Lead product strategy and work with cross-functional teams to deliver innovative solutions.',
-    skills: ['Product Strategy', 'Agile', 'Analytics', 'Leadership', 'SQL']
-  },
-  {
-    id: 3,
-    title: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Remote',
-    type: 'contract',
-    salary: '$80K - $120K',
-    posted: '3 days ago',
-    savedDate: '2 days ago',
-    applicationDeadline: null,
-    isUrgent: false,
-    description: 'Create beautiful and intuitive user interfaces for web and mobile applications.',
-    skills: ['Figma', 'Sketch', 'Prototyping', 'User Research', 'Design Systems']
-  },
-  {
-    id: 4,
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'Austin, TX',
-    type: 'full-time',
-    salary: '$100K - $150K',
-    posted: '1 week ago',
-    savedDate: '5 days ago',
-    applicationDeadline: 'March 10, 2025',
-    isUrgent: false,
-    description: 'Build end-to-end web applications using modern technologies and frameworks.',
-    skills: ['Node.js', 'React', 'MongoDB', 'Express', 'AWS', 'Docker']
-  }
-])
+const { data: savedJobs, pending, error, refresh } = useFetch('/api/candidate/saved-jobs')
 
 const filteredJobs = computed(() => {
   let filtered = savedJobs.value
@@ -281,13 +223,19 @@ const filteredJobs = computed(() => {
   return filtered
 })
 
-function unsaveJob(jobId) {
-  const index = savedJobs.value.findIndex(job => job.id === jobId)
-  if (index > -1) {
-    savedJobs.value.splice(index, 1)
+async function unsaveJob(jobId) {
+  try {
+    await useFetch('/api/candidate/saved-jobs', {
+      method: 'PUT',
+      body: {
+        jobId,
+        save: false
+      }
+    })
+    refresh()
+  } catch (error) {
+    console.error('Failed to unsave job:', error)
   }
-  // Remove from selection if selected
-  selectedJobs.value = selectedJobs.value.filter(id => id !== jobId)
 }
 
 function applyToJob(jobId) {

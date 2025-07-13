@@ -1,10 +1,11 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
-// Mock users database - replace with actual database
-const users = []
+import { connectMongoose } from '~/server/utils/mongodb'
+import User from '~/server/models/User'
+import Candidate from '~/server/models/Candidate'
 
 export default defineEventHandler(async (event) => {
+  await connectMongoose()
   const body = await readBody(event)
   const { name, email, password, role } = body
 
@@ -16,7 +17,8 @@ export default defineEventHandler(async (event) => {
   }
 
   // Check if user already exists
-  if (users.find(u => u.email === email)) {
+  const existingUser = await User.findOne({ email })
+  if (existingUser) {
     throw createError({
       statusCode: 409,
       statusMessage: 'User already exists'
@@ -27,27 +29,34 @@ export default defineEventHandler(async (event) => {
   const hashedPassword = await bcrypt.hash(password, 10)
 
   // Create new user
-  const newUser = {
-    id: users.length + 1,
+  const newUser = new User({
     name,
     email,
     password: hashedPassword,
-    role,
-    createdAt: new Date().toISOString()
+    role
+  })
+
+  if (role === 'candidate') {
+    const newCandidate = new Candidate({
+      name,
+      email
+    })
+    await newCandidate.save()
+    newUser.candidate = newCandidate._id
   }
 
-  users.push(newUser)
+  await newUser.save()
 
   // Generate JWT token
   const config = useRuntimeConfig()
   const token = jwt.sign(
-    { userId: newUser.id, email: newUser.email, role: newUser.role },
+    { userId: newUser._id, email: newUser.email, role: newUser.role },
     config.jwtSecret,
     { expiresIn: '7d' }
   )
 
   // Return user data (without password) and token
-  const { password: _, ...userWithoutPassword } = newUser
+  const { password: _, ...userWithoutPassword } = newUser.toObject()
 
   return {
     success: true,

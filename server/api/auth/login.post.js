@@ -1,32 +1,10 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
-// Mock users database - replace with actual database
-const users = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: '$2a$10$rOOjcuHgI7RV2XQX9KyA9ey9jcpF1a2rXB4.m4jVX.YqeJgXKKQKy', // 'password'
-    role: 'candidate'
-  },
-  {
-    id: 2,
-    name: 'TechCorp Inc.',
-    email: 'hr@techcorp.com',
-    password: '$2a$10$rOOjcuHgI7RV2XQX9KyA9ey9jcpF1a2rXB4.m4jVX.YqeJgXKKQKy', // 'password'
-    role: 'company'
-  },
-  {
-    id: 3,
-    name: 'Admin User',
-    email: 'admin@jobportal.com',
-    password: '$2a$10$rOOjcuHgI7RV2XQX9KyA9ey9jcpF1a2rXB4.m4jVX.YqeJgXKKQKy', // 'password'
-    role: 'admin'
-  }
-]
+import { connectMongoose } from '~/server/utils/mongodb'
+import User from '~/server/models/User'
 
 export default defineEventHandler(async (event) => {
+  await connectMongoose()
   const body = await readBody(event)
   const { email, password } = body
 
@@ -38,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Find user
-  const user = users.find(u => u.email === email)
+  const user = await User.findOne({ email })
   if (!user) {
     throw createError({
       statusCode: 401,
@@ -58,13 +36,13 @@ export default defineEventHandler(async (event) => {
   // Generate JWT token
   const config = useRuntimeConfig()
   const token = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
+    { userId: user._id, email: user.email, role: user.role },
     config.jwtSecret,
     { expiresIn: '7d' }
   )
 
   // Return user data (without password) and token
-  const { password: _, ...userWithoutPassword } = user
+  const { password: _, ...userWithoutPassword } = user.toObject()
 
   return {
     success: true,

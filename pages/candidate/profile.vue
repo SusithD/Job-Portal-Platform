@@ -278,41 +278,15 @@ definePageMeta({
 
 const newSkill = ref('')
 
-const profile = reactive({
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john@example.com',
-  phone: '+1 (555) 123-4567',
-  location: 'San Francisco, CA',
-  title: 'Senior Frontend Developer',
-  bio: 'Passionate frontend developer with 5+ years of experience building modern web applications.',
-  experience: [
-    {
-      title: 'Senior Frontend Developer',
-      company: 'TechCorp Inc.',
-      startDate: '2022-01',
-      endDate: '',
-      current: true,
-      description: 'Lead frontend development for multiple web applications using React and Vue.js.'
-    }
-  ],
-  education: [
-    {
-      degree: 'Bachelor of Science',
-      school: 'University of California',
-      field: 'Computer Science',
-      year: 2019
-    }
-  ],
-  skills: ['React', 'Vue.js', 'JavaScript', 'TypeScript', 'CSS', 'Node.js'],
-  resume: {
-    name: 'john-doe-resume.pdf',
-    url: '/resumes/john-doe-resume.pdf'
-  },
-  settings: {
-    profileVisible: true,
-    emailNotifications: true,
-    jobAlerts: true
+const { data: profile, pending, error, refresh } = useFetch('/api/candidate/profile')
+
+watch(profile, (newProfile) => {
+  if (newProfile) {
+    // Ensure experience and education are arrays
+    if (!newProfile.experience) newProfile.experience = []
+    if (!newProfile.education) newProfile.education = []
+    if (!newProfile.skills) newProfile.skills = []
+    if (!newProfile.settings) newProfile.settings = {}
   }
 })
 
@@ -331,10 +305,21 @@ const profileCompletion = computed(() => {
   return Math.round((completedItems / completionItems.value.length) * 100)
 })
 
-function saveBasicInfo() {
-  // Handle saving basic information
-  console.log('Saving basic info:', profile)
+async function saveProfile() {
+  try {
+    await useFetch('/api/candidate/profile', {
+      method: 'PUT',
+      body: profile.value
+    })
+    // Optionally, show a success message
+  } catch (error) {
+    console.error('Failed to save profile:', error)
+    // Optionally, show an error message
+  }
 }
+
+// Watch for changes and save automatically
+watch(profile, saveProfile, { deep: true })
 
 function addExperience() {
   profile.experience.push({

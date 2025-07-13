@@ -139,81 +139,43 @@ definePageMeta({
 
 const { user } = useAuth()
 
-const stats = [
-  {
-    title: 'Applications',
-    value: '12',
-    icon: DocumentTextIcon,
-    colorClass: 'bg-primary-600'
-  },
-  {
-    title: 'Profile Views',
-    value: '48',
-    icon: EyeIcon,
-    colorClass: 'bg-green-600'
-  },
-  {
-    title: 'Saved Jobs',
-    value: '7',
-    icon: HeartIcon,
-    colorClass: 'bg-yellow-600'
-  },
-  {
-    title: 'Interviews',
-    value: '3',
-    icon: BriefcaseIcon,
-    colorClass: 'bg-blue-600'
-  }
-]
+const { data: dashboardData, pending, error } = useFetch('/api/candidate/dashboard')
 
-const recentApplications = ref([
-  {
-    id: 1,
-    jobTitle: 'Senior Frontend Developer',
-    company: 'TechCorp Inc.',
-    status: 'In Review',
-    appliedDate: '2 days ago'
-  },
-  {
-    id: 2,
-    jobTitle: 'Product Manager',
-    company: 'InnovateLab',
-    status: 'Shortlisted',
-    appliedDate: '5 days ago'
-  },
-  {
-    id: 3,
-    jobTitle: 'UX Designer',
-    company: 'DesignStudio',
-    status: 'Applied',
-    appliedDate: '1 week ago'
-  }
-])
+const stats = computed(() => {
+  if (!dashboardData.value) return []
+  return [
+    {
+      title: 'Applications',
+      value: dashboardData.value.stats.applications,
+      icon: DocumentTextIcon,
+      colorClass: 'bg-primary-600'
+    },
+    {
+      title: 'Profile Views',
+      value: dashboardData.value.stats.profileViews,
+      icon: EyeIcon,
+      colorClass: 'bg-green-600'
+    },
+    {
+      title: 'Saved Jobs',
+      value: dashboardData.value.stats.savedJobs,
+      icon: HeartIcon,
+      colorClass: 'bg-yellow-600'
+    },
+    {
+      title: 'Interviews',
+      value: dashboardData.value.stats.interviews,
+      icon: BriefcaseIcon,
+      colorClass: 'bg-blue-600'
+    }
+  ]
+})
 
-const recommendedJobs = ref([
-  {
-    id: 1,
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'Remote',
-    posted: '1 day ago'
-  },
-  {
-    id: 2,
-    title: 'React Developer',
-    company: 'WebFlow Inc.',
-    location: 'San Francisco, CA',
-    posted: '3 days ago'
-  },
-  {
-    id: 3,
-    title: 'JavaScript Engineer',
-    company: 'CodeCraft',
-    location: 'New York, NY',
-    posted: '5 days ago'
-  }
-])
+const recentApplications = computed(() => dashboardData.value?.recentApplications || [])
+const recommendedJobs = computed(() => dashboardData.value?.recommendedJobs || [])
+const profileCompletion = computed(() => dashboardData.value?.profileCompletion || 0)
 
+// This would be driven by the user's actual profile data
 const profileItems = ref([
   { title: 'Basic Information', completed: true, link: '/candidate/profile' },
   { title: 'Resume Upload', completed: true, link: '/candidate/profile' },
@@ -222,11 +184,6 @@ const profileItems = ref([
   { title: 'Education', completed: true, link: '/candidate/profile' },
   { title: 'Portfolio', completed: false, link: '/candidate/profile' }
 ])
-
-const profileCompletion = computed(() => {
-  const completedItems = profileItems.value.filter(item => item.completed).length
-  return Math.round((completedItems / profileItems.value.length) * 100)
-})
 
 function getStatusClass(status) {
   switch (status.toLowerCase()) {

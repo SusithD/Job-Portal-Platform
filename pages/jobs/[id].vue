@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div v-if="job" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Job Header -->
     <div class="card p-8 mb-8">
       <div class="flex items-start justify-between mb-6">
@@ -186,31 +186,55 @@ const { user } = useAuth()
 const isSaved = ref(false)
 const hasApplied = ref(false)
 
-const { data: job, pending, error } = await useFetch(`/api/jobs/${route.params.id}`, {
-  lazy: true,
-  server: false
-})
+const { data: job, pending, error } = await useFetch(`/api/jobs/${route.params.id}`)
 
 // TODO: Fetch similar jobs from API
 const similarJobs = ref([])
 
-function saveJob() {
+async function saveJob() {
+  if (!user.value) {
+    navigateTo('/auth/login')
+    return
+  }
+
   isSaved.value = !isSaved.value
-  // Handle saving job to user's saved jobs
+  try {
+    await useFetch('/api/candidate/saved-jobs', {
+      method: 'PUT',
+      body: {
+        jobId: job.value._id,
+        save: isSaved.value
+      }
+    })
+  } catch (error) {
+    console.error('Failed to save job:', error)
+    // Optionally, revert the isSaved state and show an error
+    isSaved.value = !isSaved.value
+  }
 }
 
-function applyToJob() {
+async function applyToJob() {
   if (!user.value) {
     navigateTo('/auth/login')
     return
   }
   
-  hasApplied.value = true
-  // Handle job application
+  try {
+    await useFetch('/api/applications', {
+      method: 'POST',
+      body: {
+        jobId: job.value._id
+      }
+    })
+    hasApplied.value = true
+  } catch (error) {
+    console.error('Failed to apply for job:', error)
+    // Optionally, show an error message to the user
+  }
 }
 
 useSeoMeta({
-  title: `${job.value.title} at ${job.value.company} - JobPortal`,
-  description: job.value.description
+  title: () => `${job.value?.title} at ${job.value?.company} - JobPortal`,
+  description: () => job.value?.description
 })
 </script>

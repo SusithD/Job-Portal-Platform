@@ -58,28 +58,28 @@
     <div class="space-y-4">
       <div
         v-for="application in filteredApplications"
-        :key="application.id"
+        :key="application._id"
         class="card p-6 hover:shadow-md transition-shadow"
       >
         <div class="flex items-start justify-between">
           <div class="flex items-start space-x-4">
             <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
               <span class="text-lg font-semibold text-gray-600">
-                {{ application.company.charAt(0) }}
+                {{ application.job.company.charAt(0) }}
               </span>
             </div>
             <div class="flex-1">
               <div class="flex items-start justify-between">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900 hover:text-primary-600 cursor-pointer">
-                    {{ application.jobTitle }}
+                    {{ application.job.title }}
                   </h3>
-                  <p class="text-gray-600 font-medium">{{ application.company }}</p>
+                  <p class="text-gray-600 font-medium">{{ application.job.company }}</p>
                   <div class="flex items-center text-sm text-gray-500 mt-1">
                     <MapPinIcon class="w-4 h-4 mr-1" />
-                    <span>{{ application.location }}</span>
+                    <span>{{ application.job.location }}</span>
                     <span class="mx-2">•</span>
-                    <span>Applied {{ application.appliedDate }}</span>
+                    <span>Applied {{ new Date(application.createdAt).toLocaleDateString() }}</span>
                   </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -91,23 +91,23 @@
                   </span>
                   <div class="relative">
                     <button
-                      @click="toggleDropdown(application.id)"
+                      @click="toggleDropdown(application._id)"
                       class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                     >
                       <EllipsisVerticalIcon class="w-5 h-5" />
                     </button>
                     <div
-                      v-if="activeDropdown === application.id"
+                      v-if="activeDropdown === application._id"
                       class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10"
                     >
                       <button
-                        @click="viewApplication(application.id)"
+                        @click="viewApplication(application._id)"
                         class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         View Details
                       </button>
                       <button
-                        @click="withdrawApplication(application.id)"
+                        @click="withdrawApplication(application._id)"
                         class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                       >
                         Withdraw Application
@@ -119,35 +119,7 @@
               
               <!-- Application Timeline -->
               <div class="mt-4 pt-4 border-t border-gray-200">
-                <div class="flex items-center space-x-4">
-                  <div
-                    v-for="(step, index) in application.timeline"
-                    :key="step.status"
-                    class="flex items-center"
-                  >
-                    <div
-                      class="w-3 h-3 rounded-full"
-                      :class="step.completed ? 'bg-primary-600' : 'bg-gray-300'"
-                    ></div>
-                    <span
-                      class="ml-2 text-xs"
-                      :class="step.completed ? 'text-gray-900' : 'text-gray-500'"
-                    >
-                      {{ step.label }}
-                    </span>
-                    <div
-                      v-if="index < application.timeline.length - 1"
-                      class="w-8 h-px bg-gray-300 mx-3"
-                    ></div>
-                  </div>
-                </div>
-                
-                <!-- Next Steps -->
-                <div v-if="application.nextSteps" class="mt-3">
-                  <p class="text-sm text-gray-600">
-                    <span class="font-medium">Next:</span> {{ application.nextSteps }}
-                  </p>
-                </div>
+                <p class="text-sm text-gray-500">Timeline not yet implemented.</p>
               </div>
             </div>
           </div>
@@ -219,68 +191,7 @@ const stats = [
   }
 ]
 
-const applications = ref([
-  {
-    id: 1,
-    jobTitle: 'Senior Frontend Developer',
-    company: 'TechCorp Inc.',
-    location: 'San Francisco, CA',
-    status: 'interview',
-    appliedDate: '2 days ago',
-    timeline: [
-      { status: 'applied', label: 'Applied', completed: true },
-      { status: 'review', label: 'Review', completed: true },
-      { status: 'interview', label: 'Interview', completed: true },
-      { status: 'decision', label: 'Decision', completed: false }
-    ],
-    nextSteps: 'Final interview scheduled for tomorrow at 2 PM'
-  },
-  {
-    id: 2,
-    jobTitle: 'Product Manager',
-    company: 'InnovateLab',
-    location: 'New York, NY',
-    status: 'shortlisted',
-    appliedDate: '5 days ago',
-    timeline: [
-      { status: 'applied', label: 'Applied', completed: true },
-      { status: 'review', label: 'Review', completed: true },
-      { status: 'interview', label: 'Interview', completed: false },
-      { status: 'decision', label: 'Decision', completed: false }
-    ],
-    nextSteps: 'Waiting for interview invitation'
-  },
-  {
-    id: 3,
-    jobTitle: 'UX Designer',
-    company: 'DesignStudio',
-    location: 'Remote',
-    status: 'in-review',
-    appliedDate: '1 week ago',
-    timeline: [
-      { status: 'applied', label: 'Applied', completed: true },
-      { status: 'review', label: 'Review', completed: true },
-      { status: 'interview', label: 'Interview', completed: false },
-      { status: 'decision', label: 'Decision', completed: false }
-    ],
-    nextSteps: 'Application under review by hiring team'
-  },
-  {
-    id: 4,
-    jobTitle: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'Austin, TX',
-    status: 'rejected',
-    appliedDate: '2 weeks ago',
-    timeline: [
-      { status: 'applied', label: 'Applied', completed: true },
-      { status: 'review', label: 'Review', completed: true },
-      { status: 'interview', label: 'Interview', completed: false },
-      { status: 'decision', label: 'Decision', completed: true }
-    ],
-    nextSteps: null
-  }
-])
+const { data: applications, pending, error } = useFetch('/api/applications')
 
 const filteredApplications = computed(() => {
   let filtered = applications.value

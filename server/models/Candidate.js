@@ -31,6 +31,18 @@ const CandidateSchema = new mongoose.Schema({
     profileVisible: Boolean,
     emailNotifications: Boolean,
     jobAlerts: Boolean
+  },
+  savedJobs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Job'
+  }],
+  profileViews: {
+    type: Number,
+    default: 0
+  },
+  profileCompletion: {
+    type: Number,
+    default: 0
   }
 })
 
